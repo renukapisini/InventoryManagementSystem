@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Inventory Management System (IMS)
 
 An enterprise-grade, secure, full-stack web application built in **ASP.NET Core MVC** (.NET 9 / .NET 10), **Entity Framework Core (SQLite In-Memory)**, **Bootstrap 5**, and **Chart.js**.
@@ -191,3 +192,7 @@ If `IsEnabled` is `false`, the email service operates in **Development Mode**, l
 | **6 Filtered Reports** | Completed | Register, Status, Category, Location, Department, Activity reports |
 | **My Profile & Change Password** | Completed | View profile, change password with complexity validation |
 | **Automated Testing** | Completed | xUnit test suite passing 100% (5/5 tests passed) |
+=======
+# IMS
+ - .NET Framework + MySQL
+>>>>>>> 4ce237c9116b11e8ce1086bf6e486a463b1a88bc
