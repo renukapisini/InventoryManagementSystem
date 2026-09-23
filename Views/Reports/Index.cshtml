@@ -1,0 +1,194 @@
+@model InventoryManagementSystem.Models.ViewModels.ReportResultViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">@Model.Title</h4>
+        <p class="text-muted small mb-0">Generated on @Model.GeneratedDate.ToString("F") for <strong>@Model.OrganisationName</strong></p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print();">
+        <i class="bi bi-printer me-1"></i> Print Report
+    </button>
+</div>
+
+<!-- Report Filter Card -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">Report Type</label>
+                <select name="ReportType" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="Register" selected="@(Model.Filter.ReportType == "Register")">Inventory Register</option>
+                    <option value="Status" selected="@(Model.Filter.ReportType == "Status")">Asset Status Report</option>
+                    <option value="Category" selected="@(Model.Filter.ReportType == "Category")">Category Report</option>
+                    <option value="Location" selected="@(Model.Filter.ReportType == "Location")">Location Report</option>
+                    <option value="Department" selected="@(Model.Filter.ReportType == "Department")">Department Report</option>
+                    <option value="Activity" selected="@(Model.Filter.ReportType == "Activity")">Inventory Activity Log</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">Category</label>
+                <select name="CategoryId" asp-items="Model.Filter.Categories" class="form-select form-select-sm">
+                    <option value="">-- All Categories --</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">Status</label>
+                <select name="Status" asp-items="Model.Filter.Statuses" class="form-select form-select-sm">
+                    <option value="">-- All Statuses --</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">Start Date</label>
+                <input type="date" name="StartDate" value="@(Model.Filter.StartDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">End Date</label>
+                <input type="date" name="EndDate" value="@(Model.Filter.EndDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end gap-1 mt-4">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-filter"></i> Apply</button>
+                <a href="@Url.Action("Index", "Reports")" class="btn btn-light btn-sm text-muted"><i class="bi bi-x-circle"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Report Data Results Card -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0 text-dark">Total Records: <span class="badge bg-primary">@Model.TotalCount</span></h6>
+        <span class="text-muted small">@Model.OrganisationName</span>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model.Filter.ReportType == "Activity")
+        {
+            <div class="table-responsive">
+                <table class="table custom-table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Entity ID</th>
+                            <th>Performed By</th>
+                            <th>Description</th>
+                            <th>Date / Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ActivityLogs.Any())
+                        {
+                            foreach (var act in Model.ActivityLogs)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-light text-dark border">@act.Action</span></td>
+                                    <td class="fw-bold text-dark">@act.EntityName</td>
+                                    <td class="font-monospace">#(act.EntityId ?? 0)</td>
+                                    <td><strong>@act.PerformedBy</strong></td>
+                                    <td class="small text-muted">@act.Description</td>
+                                    <td class="small text-muted">@act.CreatedDate.ToLocalTime().ToString("g")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="text-center py-4 text-muted">No activity records match filter criteria.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else if (Model.GroupedItems.Any())
+        {
+            <div class="p-3">
+                @foreach (var group in Model.GroupedItems)
+                {
+                    <div class="card border mb-3">
+                        <div class="card-header bg-light d-flex align-items-center justify-content-between py-2">
+                            <strong class="text-dark">@group.GroupName</strong>
+                            <span class="badge bg-secondary">@group.TotalAssets Assets ($@group.TotalValue.ToString("N2"))</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Asset Code</th>
+                                        <th>Asset Name</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Location</th>
+                                        <th>Assigned To</th>
+                                        <th>Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var a in group.Assets)
+                                    {
+                                        <tr>
+                                            <td class="font-monospace fw-bold">@a.AssetCode</td>
+                                            <td>@a.AssetName</td>
+                                            <td>@a.CategoryName</td>
+                                            <td>@a.Status</td>
+                                            <td>@(a.Location ?? "N/A")</td>
+                                            <td>@(a.AssignedToUserName ?? "Unassigned")</td>
+                                            <td>$@a.PurchaseCost.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table custom-table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Asset Code</th>
+                            <th>Asset Name</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Location</th>
+                            <th>Assigned To</th>
+                            <th>Purchase Date</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.InventoryRegister.Any())
+                        {
+                            foreach (var a in Model.InventoryRegister)
+                            {
+                                <tr>
+                                    <td class="font-monospace fw-bold text-primary">@a.AssetCode</td>
+                                    <td class="fw-medium text-dark">@a.AssetName</td>
+                                    <td><span class="badge bg-light text-dark border">@a.CategoryName</span></td>
+                                    <td>@a.Status</td>
+                                    <td>@(a.Location ?? "N/A")</td>
+                                    <td>@(a.AssignedToUserName ?? "Unassigned")</td>
+                                    <td>@a.PurchaseDate.ToString("yyyy-MM-dd")</td>
+                                    <td class="fw-bold">$@a.PurchaseCost.ToString("N2")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="8" class="text-center py-4 text-muted">No inventory records match filter criteria.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

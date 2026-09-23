@@ -1,0 +1,79 @@
+@model InventoryManagementSystem.Models.ViewModels.UserViewModel
+@{
+    ViewData["Title"] = $"User Profile - {Model.FirstName} {Model.LastName}";
+}
+
+<div class="mb-4">
+    <a href="@Url.Action("Index", "Users")" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to User Directory
+    </a>
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h4 class="fw-bold mb-1">@Model.FirstName @Model.LastName</h4>
+            <span class="badge bg-secondary font-monospace">@Model.EmployeeId</span>
+            <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger") ms-2">
+                @(Model.IsActive ? "Active User" : "Inactive User")
+            </span>
+        </div>
+        <a href="@Url.Action("Edit", "Users", new { id = Model.Id })" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Edit User Profile
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-person-vcard me-2 text-primary"></i> Account Credentials</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Username</small>
+                        <span class="fs-6 font-monospace fw-bold text-dark">@@@Model.Username</span>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Assigned Role</small>
+                        <span class="badge bg-primary fs-6">@Model.RoleName</span>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Email Address</small>
+                        <span class="fs-6 text-dark">@Model.Email</span>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Mobile Phone</small>
+                        <span class="fs-6 text-dark">@(string.IsNullOrEmpty(Model.MobileNumber) ? "N/A" : Model.MobileNumber)</span>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Department</small>
+                        <span class="fs-6 text-dark">@(Model.Department ?? "N/A")</span>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Account Created</small>
+                        <span class="fs-6 text-dark">@Model.CreatedDate.ToLocalTime().ToString("g")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2 text-info"></i> Assigned Inventory Assets (@Model.AssignedAssetsCount)</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Total equipment assigned to this user: <strong>@Model.AssignedAssetsCount</strong></p>
+                <a href="@Url.Action("Index", "Assets", new { assignedUserId = Model.Id })" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-list-task me-1"></i> View Assigned Assets in Directory &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

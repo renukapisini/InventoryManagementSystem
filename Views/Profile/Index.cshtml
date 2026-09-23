@@ -1,0 +1,125 @@
+@model InventoryManagementSystem.Models.ViewModels.UserProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-1">My Account Profile</h4>
+    <p class="text-muted small mb-0">View personal information, assigned assets, and system permissions.</p>
+</div>
+
+<div class="row g-4">
+    <!-- Left Profile Card -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-person-gear me-2 text-primary"></i> Basic Information</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Username" />
+                    <input type="hidden" asp-for="EmployeeId" />
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small mb-1">Employee ID</label>
+                            <input value="@Model.EmployeeId" class="form-control bg-light" disabled />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small mb-1">Username</label>
+                            <input value="@@@Model.Username" class="form-control bg-light" disabled />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label fw-semibold text-dark"></label>
+                            <input asp-for="FirstName" class="form-control" required />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label fw-semibold text-dark"></label>
+                            <input asp-for="LastName" class="form-control" required />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold text-dark"></label>
+                            <input asp-for="Email" class="form-control" required />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="MobileNumber" class="form-label fw-semibold text-dark"></label>
+                            <input asp-for="MobileNumber" class="form-control" />
+                            <span asp-validation-for="MobileNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small mb-1">Assigned Role</label>
+                            <input value="@Model.RoleName" class="form-control bg-light font-weight-bold" disabled />
+                            <small class="form-text text-muted" style="font-size:0.75rem;">Users cannot modify their own assigned role.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small mb-1">Department</label>
+                            <input value="@(Model.Department ?? "N/A")" class="form-control bg-light" disabled />
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-sm px-4">Save Profile Updates</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: Granted Permissions & Assigned Assets -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-check me-2 text-success"></i> My Permissions (@Model.RolePermissions.Count)</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-1">
+                    @foreach (var perm in Model.RolePermissions)
+                    {
+                        <span class="badge bg-primary-soft text-primary font-monospace p-2">@perm</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2 text-info"></i> Equipment Assigned To Me (@Model.AssignedAssets.Count)</h6>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.AssignedAssets.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var asset in Model.AssignedAssets)
+                        {
+                            <div class="list-group-item p-3">
+                                <div class="fw-bold text-dark">@asset.AssetName</div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <span class="badge bg-light text-dark font-monospace border">@asset.AssetCode</span>
+                                    <span class="badge bg-success-soft text-success">@asset.Status</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small p-3 mb-0">No equipment currently assigned to your account.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

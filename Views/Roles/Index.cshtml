@@ -1,0 +1,45 @@
+@model List<InventoryManagementSystem.Models.ViewModels.RoleViewModel>
+@{
+    ViewData["Title"] = "Role & Permission Management";
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-1">System Roles & Permissions</h4>
+    <p class="text-muted small mb-0">View role hierarchies and customize granular access permissions.</p>
+</div>
+
+<div class="row g-4">
+    @foreach (var role in Model)
+    {
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">@role.Name</h5>
+                        <span class="badge bg-light text-dark border mt-1">@role.UserCount Users Assigned</span>
+                    </div>
+                    <a href="@Url.Action("EditPermissions", "Roles", new { id = role.Id })" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-shield-check me-1"></i> Configure Permissions
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">@role.Description</p>
+                    <h6 class="fw-bold text-dark mb-2" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em;">Granted Permissions (@role.AssignedPermissions.Count)</h6>
+                    <div class="d-flex flex-wrap gap-1">
+                        @if (role.AssignedPermissions.Any())
+                        {
+                            foreach (var perm in role.AssignedPermissions)
+                            {
+                                <span class="badge bg-primary-soft text-primary font-monospace" style="font-size:0.75rem;">@perm</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted small">No permissions granted.</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

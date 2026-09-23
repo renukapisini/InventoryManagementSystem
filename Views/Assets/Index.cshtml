@@ -1,0 +1,209 @@
+@model InventoryManagementSystem.Models.ViewModels.AssetListViewModel
+@{
+    ViewData["Title"] = "Asset Management";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Asset Directory</h4>
+        <p class="text-muted small mb-0">Search, filter, and manage all organization inventory assets.</p>
+    </div>
+    <a href="@Url.Action("Create", "Assets")" class="btn btn-primary btn-sm shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Add Asset
+    </a>
+</div>
+
+<!-- Search & Filters Card -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Code, Name, Serial #..." />
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="categoryId" asp-items="Model.Categories" class="form-select">
+                    <option value="">-- All Categories --</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="status" asp-items="Model.Statuses" class="form-select">
+                    <option value="">-- All Statuses --</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="department" class="form-select">
+                    <option value="">-- All Depts --</option>
+                    @foreach (var dept in Model.Departments)
+                    {
+                        <option value="@dept" selected="@(dept == Model.DepartmentFilter)">@dept</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="assignedUserId" asp-items="Model.Users" class="form-select">
+                    <option value="">-- Assigned User --</option>
+                </select>
+            </div>
+
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary w-100" title="Search"><i class="bi bi-filter"></i></button>
+                <a href="@Url.Action("Index", "Assets")" class="btn btn-light text-muted" title="Reset"><i class="bi bi-x-circle"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Assets Table Card -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table custom-table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Asset Code</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Assigned To</th>
+                        <th>Cost</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Assets.Any())
+                    {
+                        foreach (var item in Model.Assets)
+                        {
+                            var badgeClass = item.Status switch
+                            {
+                                "Available" => "badge-available",
+                                "Assigned" => "badge-assigned",
+                                "Under Maintenance" => "badge-maintenance",
+                                "Damaged" => "badge-damaged",
+                                "Retired" => "badge-retired",
+                                _ => "badge-lost"
+                            };
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("Details", "Assets", new { id = item.Id })" class="fw-bold text-primary text-decoration-none">
+                                        @item.AssetCode
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@item.AssetName</div>
+                                    @if (!string.IsNullOrEmpty(item.SerialNumber))
+                                    {
+                                        <small class="text-muted font-monospace" style="font-size:0.75rem;">S/N: @item.SerialNumber</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@item.CategoryName</span>
+                                </td>
+                                <td>
+                                    <span class="badge-status @badgeClass">@item.Status</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>@(item.Location ?? "Unspecified")</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.AssignedToUserName) && item.AssignedToUserName != "Unassigned")
+                                    {
+                                        <span class="badge bg-primary-soft text-primary"><i class="bi bi-person me-1"></i>@item.AssignedToUserName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">--</span>
+                                    }
+                                </td>
+                                <td class="fw-medium text-dark">
+                                    $@item.PurchaseCost.ToString("N2")
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="@Url.Action("Details", "Assets", new { id = item.Id })" class="btn btn-light text-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Assets", new { id = item.Id })" class="btn btn-light text-secondary" title="Edit Asset">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-light text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id" title="Delete Asset">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Confirmation Modal -->
+                                    <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content text-start">
+                                                <div class="modal-header border-0">
+                                                    <h6 class="modal-title fw-bold text-dark"><i class="bi bi-exclamation-triangle text-danger me-2"></i> Confirm Asset Deletion</h6>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-muted">
+                                                    Are you sure you want to delete asset <strong>@item.AssetName (@item.AssetCode)</strong>? This action cannot be undone.
+                                                </div>
+                                                <div class="modal-footer border-0">
+                                                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="m-0">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger btn-sm">Delete Asset</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                    <h6>No matching assets found</h6>
+                                    <p class="small">Try adjusting search parameters or clear filters.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination Footer -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer bg-white border-top py-3 d-flex align-items-center justify-content-between">
+            <small class="text-muted">
+                Showing Page <strong>@Model.PageIndex</strong> of <strong>@Model.TotalPages</strong> (Total @Model.TotalCount Assets)
+            </small>
+            <nav aria-label="Asset List Pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", "Assets", new { pageIndex = Model.PageIndex - 1, searchTerm = Model.SearchTerm, categoryId = Model.CategoryIdFilter, status = Model.StatusFilter })">Previous</a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", "Assets", new { pageIndex = i, searchTerm = Model.SearchTerm, categoryId = Model.CategoryIdFilter, status = Model.StatusFilter })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", "Assets", new { pageIndex = Model.PageIndex + 1, searchTerm = Model.SearchTerm, categoryId = Model.CategoryIdFilter, status = Model.StatusFilter })">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

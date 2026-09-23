@@ -1,0 +1,159 @@
+@model InventoryManagementSystem.Models.ViewModels.AssetViewModel
+@{
+    ViewData["Title"] = $"Asset Details - {Model.AssetCode}";
+    var badgeClass = Model.Status switch
+    {
+        "Available" => "badge-available",
+        "Assigned" => "badge-assigned",
+        "Under Maintenance" => "badge-maintenance",
+        "Damaged" => "badge-damaged",
+        "Retired" => "badge-retired",
+        _ => "badge-lost"
+    };
+}
+
+<div class="mb-4">
+    <a href="@Url.Action("Index", "Assets")" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to Asset Directory
+    </a>
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h4 class="fw-bold mb-1">@Model.AssetName</h4>
+            <span class="badge bg-secondary font-monospace">@Model.AssetCode</span>
+            <span class="badge-status @badgeClass ms-2">@Model.Status</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Edit", "Assets", new { id = Model.Id })" class="btn btn-primary btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit Asset
+            </a>
+            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAssetModal">
+                <i class="bi bi-trash me-1"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Details Card -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-info-circle me-2 text-primary"></i> Asset Specifications</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Category</small>
+                        <span class="fs-6 fw-semibold text-dark">@Model.CategoryName</span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Serial Number</small>
+                        <span class="fs-6 font-monospace text-dark">@(string.IsNullOrEmpty(Model.SerialNumber) ? "N/A" : Model.SerialNumber)</span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Purchase Date</small>
+                        <span class="fs-6 text-dark">@Model.PurchaseDate.ToString("MMMM dd, yyyy")</span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Purchase Cost</small>
+                        <span class="fs-5 fw-bold text-success">$@Model.PurchaseCost.ToString("N2")</span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Location</small>
+                        <span class="fs-6 text-dark"><i class="bi bi-geo-alt me-1 text-danger"></i>@(Model.Location ?? "Unspecified")</span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Department</small>
+                        <span class="fs-6 text-dark"><i class="bi bi-building me-1 text-primary"></i>@(Model.Department ?? "Unassigned")</span>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="font-size:0.75rem;">Description & Notes</small>
+                        <p class="text-dark bg-light p-3 rounded-3 mt-1 mb-0">
+                            @(string.IsNullOrWhiteSpace(Model.Description) ? "No description provided." : Model.Description)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Cards: Assignment & Audit info -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-person me-2 text-info"></i> User Assignment</h6>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.AssignedToUserName) && Model.AssignedToUserName != "Unassigned")
+                {
+                    <div class="d-flex align-items-center gap-3 bg-primary-soft p-3 rounded-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:42px; height:42px; font-weight:700;">
+                            @Model.AssignedToUserName.Substring(0, 1)
+                        </div>
+                        <div>
+                            <strong class="d-block text-dark">@Model.AssignedToUserName</strong>
+                            <small class="text-muted">Assigned Custodian</small>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-light p-3 rounded-3 text-center text-muted">
+                        <i class="bi bi-dash-circle fs-4 d-block mb-1"></i>
+                        <span>Currently Unassigned (In Inventory Stock)</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-secondary"></i> System Audit Info</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block">Created By</small>
+                    <strong class="text-dark">@(Model.CreatedBy ?? "System")</strong>
+                    <small class="text-muted d-block">on @Model.CreatedDate.ToLocalTime().ToString("g")</small>
+                </div>
+
+                @if (Model.UpdatedDate.HasValue)
+                {
+                    <div>
+                        <small class="text-muted d-block">Last Updated By</small>
+                        <strong class="text-dark">@(Model.UpdatedBy ?? "System")</strong>
+                        <small class="text-muted d-block">on @Model.UpdatedDate.Value.ToLocalTime().ToString("g")</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Delete -->
+<div class="modal fade" id="deleteAssetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h6 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle text-danger me-2"></i> Confirm Asset Deletion</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-muted">
+                Are you sure you want to delete asset <strong>@Model.AssetName (@Model.AssetCode)</strong>?
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger btn-sm">Delete Asset</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

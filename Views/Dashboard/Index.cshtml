@@ -1,0 +1,305 @@
+@model InventoryManagementSystem.Models.ViewModels.DashboardViewModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Inventory Dashboard</h4>
+        <p class="text-muted small mb-0">Live inventory statistics, activity feeds, and category aggregations.</p>
+    </div>
+    <a href="@Url.Action("Create", "Assets")" class="btn btn-primary btn-sm shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Add New Asset
+    </a>
+</div>
+
+<!-- KPI Cards Row 1 -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Total Assets</span>
+                    <h3 class="fw-bold mb-0 text-dark">@Model.TotalAssets</h3>
+                </div>
+                <div class="icon-box bg-primary-soft">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">
+                Total Cost: <strong>$@Model.TotalInventoryValue.ToString("N2")</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Available Assets</span>
+                    <h3 class="fw-bold mb-0 text-success">@Model.AvailableAssets</h3>
+                </div>
+                <div class="icon-box bg-success-soft">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">Ready for assignment</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Assigned Assets</span>
+                    <h3 class="fw-bold mb-0 text-primary">@Model.AssignedAssets</h3>
+                </div>
+                <div class="icon-box bg-primary-soft">
+                    <i class="bi bi-person-check"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">Deployed to staff</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Under Maintenance</span>
+                    <h3 class="fw-bold mb-0 text-warning">@Model.UnderMaintenanceAssets</h3>
+                </div>
+                <div class="icon-box bg-warning-soft">
+                    <i class="bi bi-tools"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">In repair service</div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards Row 2 -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Damaged / Lost</span>
+                    <h3 class="fw-bold mb-0 text-danger">@(Model.DamagedAssets + Model.LostAssets)</h3>
+                </div>
+                <div class="icon-box bg-danger-soft">
+                    <i class="bi bi-exclamation-octagon"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">Damaged: @Model.DamagedAssets | Lost: @Model.LostAssets</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Retired Assets</span>
+                    <h3 class="fw-bold mb-0 text-secondary">@Model.RetiredAssets</h3>
+                </div>
+                <div class="icon-box bg-secondary-soft">
+                    <i class="bi bi-archive"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">Decommissioned</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Categories</span>
+                    <h3 class="fw-bold mb-0 text-info">@Model.TotalCategories</h3>
+                </div>
+                <div class="icon-box bg-info-soft">
+                    <i class="bi bi-tags"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">Asset classifications</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="card-stat p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold text-uppercase d-block mb-1" style="font-size:0.75rem;">Unread Alerts</span>
+                    <h3 class="fw-bold mb-0 text-danger">@Model.UnreadNotifications</h3>
+                </div>
+                <div class="icon-box bg-danger-soft">
+                    <i class="bi bi-bell"></i>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small" style="font-size: 0.75rem;">
+                <a href="@Url.Action("Index", "Notifications")" class="text-decoration-none">View Center &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visual Charts Section -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart me-2 text-primary"></i> Assets by Category</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 260px;">
+                    <canvas id="chartByCategory"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-bar-chart-steps me-2 text-success"></i> Assets by Status</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 260px;">
+                    <canvas id="chartByStatus"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt me-2 text-info"></i> Assets by Location</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 240px;">
+                    <canvas id="chartByLocation"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-building me-2 text-purple"></i> Assets by Department</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 240px;">
+                    <canvas id="chartByDepartment"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Inventory Activity & Assets Tables -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i> Recent Asset Updates</h6>
+                <a href="@Url.Action("Index", "Assets")" class="btn btn-sm btn-link text-decoration-none">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table custom-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RecentAssets.Any())
+                            {
+                                foreach (var item in Model.RecentAssets)
+                                {
+                                    var badgeClass = item.Status switch
+                                    {
+                                        "Available" => "badge-available",
+                                        "Assigned" => "badge-assigned",
+                                        "Under Maintenance" => "badge-maintenance",
+                                        "Damaged" => "badge-damaged",
+                                        "Retired" => "badge-retired",
+                                        _ => "badge-lost"
+                                    };
+                                    <tr>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Assets", new { id = item.Id })" class="fw-bold text-decoration-none">@item.AssetCode</a>
+                                        </td>
+                                        <td class="fw-medium text-dark">@item.AssetName</td>
+                                        <td><span class="badge bg-light text-dark border">@item.CategoryName</span></td>
+                                        <td><span class="badge-status @badgeClass">@item.Status</span></td>
+                                        <td class="text-muted small">@(item.Location ?? "N/A")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No inventory records available.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-activity me-2 text-success"></i> Recent Activity Log</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentActivities.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var log in Model.RecentActivities)
+                        {
+                            <div class="list-group-item border-0 px-0 py-2">
+                                <div class="d-flex align-items-start gap-2">
+                                    <span class="badge bg-light text-dark mt-1">@log.Action</span>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="small fw-medium text-dark text-truncate">@log.Description</div>
+                                        <small class="text-muted" style="font-size:0.75rem;">By <strong>@log.PerformedBy</strong> &bull; @log.CreatedDate.ToLocalTime().ToString("g")</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No recent activity logs recorded.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const byCategory = @Html.Raw(JsonSerializer.Serialize(Model.AssetsByCategory));
+            const byStatus = @Html.Raw(JsonSerializer.Serialize(Model.AssetsByStatus));
+            const byLocation = @Html.Raw(JsonSerializer.Serialize(Model.AssetsByLocation));
+            const byDepartment = @Html.Raw(JsonSerializer.Serialize(Model.AssetsByDepartment));
+
+            initDashboardCharts(byCategory, byStatus, byLocation, byDepartment);
+        });
+    </script>
+}

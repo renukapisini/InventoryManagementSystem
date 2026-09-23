@@ -1,0 +1,102 @@
+@model InventoryManagementSystem.Models.ViewModels.OrganizationViewModel
+@{
+    ViewData["Title"] = "Edit Organisation Profile";
+}
+
+<div class="mb-4">
+    <a href="@Url.Action("Index", "Organization")" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to Profile
+    </a>
+    <h4 class="fw-bold mb-1">Edit Organisation Information</h4>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 col-lg-10">
+    <div class="card-body p-4">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="LogoPath" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-4"></div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="OrganisationName" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="OrganisationName" class="form-control" required />
+                    <span asp-validation-for="OrganisationName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="OrganisationCode" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="OrganisationCode" class="form-control" required />
+                    <span asp-validation-for="OrganisationCode" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Phone" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-12">
+                    <label asp-for="Address" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label asp-for="City" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="City" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="State" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="State" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Country" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="Country" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="PostalCode" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="PostalCode" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Website" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="Website" class="form-control" placeholder="https://www.company.com" />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="LogoFile" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="LogoFile" type="file" class="form-control" accept=".png,.jpg,.jpeg,.svg,.webp" />
+                    <small class="form-text text-muted">Upload logo image (PNG, JPG, SVG, max 2MB).</small>
+                    <span asp-validation-for="LogoFile" class="text-danger small d-block"></span>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex align-items-center justify-content-end gap-2">
+                <a href="@Url.Action("Index", "Organization")" class="btn btn-light px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4 shadow-sm">Update Organisation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

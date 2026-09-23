@@ -1,0 +1,72 @@
+@model List<InventoryManagementSystem.Models.Entities.Notification>
+@{
+    ViewData["Title"] = "Notification Center";
+    var unreadCount = Model.Count(n => !n.IsRead);
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Notification Center</h4>
+        <p class="text-muted small mb-0">System alerts, inventory event logs, and status updates.</p>
+    </div>
+    @if (unreadCount > 0)
+    {
+        <form asp-action="MarkAllAsRead" method="post" class="m-0">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-check-all me-1"></i> Mark All as Read (@unreadCount)
+            </button>
+        </form>
+    }
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="list-group list-group-flush">
+                @foreach (var n in Model)
+                {
+                    <div class="list-group-item p-3 @(!n.IsRead ? "bg-light border-start border-4 border-primary" : "")">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="mt-1">
+                                    @if (!n.IsRead)
+                                    {
+                                        <span class="badge bg-primary rounded-circle p-1"><span class="visually-hidden">Unread</span></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check-circle text-muted"></i>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark mb-1">@n.Message</div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>@n.CreatedDate.ToLocalTime().ToString("f")
+                                    </small>
+                                </div>
+                            </div>
+                            @if (!n.IsRead)
+                            {
+                                <form asp-action="MarkAsRead" asp-route-id="@n.Id" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-light text-primary" title="Mark Read">
+                                        <i class="bi bi-check"></i> Mark Read
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-bell-slash fs-1 text-muted d-block mb-2"></i>
+                <h6 class="text-muted">No notifications in your inbox.</h6>
+            </div>
+        }
+    </div>
+</div>

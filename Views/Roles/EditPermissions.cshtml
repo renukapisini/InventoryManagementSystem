@@ -1,0 +1,64 @@
+@model InventoryManagementSystem.Models.ViewModels.EditRolePermissionsViewModel
+@{
+    ViewData["Title"] = $"Edit Permissions - {Model.RoleName}";
+    var grouped = Model.Permissions.GroupBy(p => p.Category).ToList();
+}
+
+<div class="mb-4">
+    <a href="@Url.Action("Index", "Roles")" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to System Roles
+    </a>
+    <h4 class="fw-bold mb-1">Configure Permissions: @Model.RoleName</h4>
+    <p class="text-muted small mb-0">Select or deselect permission checkboxes for this role.</p>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4">
+        <form asp-action="EditPermissions" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="RoleId" />
+            <input type="hidden" asp-for="RoleName" />
+
+            <div class="row g-4">
+                @for (int catIdx = 0; catIdx < grouped.Count; catIdx++)
+                {
+                    var group = grouped[catIdx];
+                    <div class="col-md-6">
+                        <div class="card border rounded-3 bg-light h-100">
+                            <div class="card-header bg-white border-bottom fw-bold text-primary">
+                                <i class="bi bi-folder2-open me-2"></i> @group.Key Category Permissions
+                            </div>
+                            <div class="card-body bg-white">
+                                @foreach (var perm in group)
+                                {
+                                    var itemIndex = Model.Permissions.FindIndex(p => p.PermissionId == perm.PermissionId);
+                                    <div class="form-check mb-3">
+                                        <input type="hidden" name="Permissions[@itemIndex].PermissionId" value="@perm.PermissionId" />
+                                        <input type="hidden" name="Permissions[@itemIndex].Code" value="@perm.Code" />
+                                        <input type="hidden" name="Permissions[@itemIndex].Name" value="@perm.Name" />
+                                        <input type="hidden" name="Permissions[@itemIndex].Category" value="@perm.Category" />
+
+                                        <input type="checkbox" name="Permissions[@itemIndex].IsSelected" value="true" class="form-check-input" id="perm-@perm.PermissionId" @(perm.IsSelected ? "checked" : "") />
+                                        <label class="form-check-label fw-bold text-dark" for="perm-@perm.PermissionId">
+                                            @perm.Name <span class="badge bg-light text-secondary font-monospace ms-1" style="font-size:0.7rem;">@perm.Code</span>
+                                        </label>
+                                        <small class="d-block text-muted" style="font-size:0.8rem;">@perm.Description</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex align-items-center justify-content-end gap-2">
+                <a href="@Url.Action("Index", "Roles")" class="btn btn-light px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                    <i class="bi bi-check-circle me-1"></i> Save Permission Matrix
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

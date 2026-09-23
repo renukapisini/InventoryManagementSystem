@@ -1,0 +1,209 @@
+@using System.Security.Claims
+@inject InventoryManagementSystem.Services.Interfaces.IOrganizationService OrgService
+@inject InventoryManagementSystem.Services.Interfaces.INotificationService NotifService
+@{
+    var org = await OrgService.GetOrganizationProfileAsync();
+    var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    int.TryParse(userIdStr, out var currentUserId);
+    var unreadNotifCount = currentUserId > 0 ? await NotifService.GetUnreadCountAsync(currentUserId) : 0;
+    var isManager = User.IsInRole("Asset Manager");
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Inventory Management System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Custom Site CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="@Url.Action("Index", "Dashboard")" class="sidebar-brand">
+                <img src="@(string.IsNullOrEmpty(org.LogoPath) ? "/images/default-logo.svg" : org.LogoPath)" alt="Org Logo" />
+                <div class="sidebar-brand-text text-truncate" style="max-width: 170px;" title="@org.OrganisationName">
+                    @org.OrganisationName
+                </div>
+            </a>
+
+            <div class="sidebar-nav">
+                <div class="nav-section-title">Main Navigation</div>
+                <a class="nav-link @(currentController == "Dashboard" ? "active" : "")" href="@Url.Action("Index", "Dashboard")">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <div class="nav-section-title">Asset Management</div>
+                <a class="nav-link @(currentController == "Assets" ? "active" : "")" href="@Url.Action("Index", "Assets")">
+                    <i class="bi bi-box-seam"></i>
+                    <span>All Assets</span>
+                </a>
+
+                @if (isManager)
+                {
+                    <a class="nav-link @(currentController == "Categories" ? "active" : "")" href="@Url.Action("Index", "Categories")">
+                        <i class="bi bi-tags"></i>
+                        <span>Categories</span>
+                    </a>
+                }
+
+                <a class="nav-link @(currentController == "Reports" ? "active" : "")" href="@Url.Action("Index", "Reports")">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Reports</span>
+                </a>
+
+                @if (isManager)
+                {
+                    <div class="nav-section-title">Administration</div>
+                    <a class="nav-link @(currentController == "Users" ? "active" : "")" href="@Url.Action("Index", "Users")">
+                        <i class="bi bi-people"></i>
+                        <span>Users</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Roles" ? "active" : "")" href="@Url.Action("Index", "Roles")">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Roles & Permissions</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Organization" ? "active" : "")" href="@Url.Action("Index", "Organization")">
+                        <i class="bi bi-building"></i>
+                        <span>Organisation Profile</span>
+                    </a>
+                }
+
+                <div class="nav-section-title">Personal Account</div>
+                <a class="nav-link @(currentController == "Notifications" ? "active" : "")" href="@Url.Action("Index", "Notifications")">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                    @if (unreadNotifCount > 0)
+                    {
+                        <span class="badge bg-danger rounded-pill ms-auto">@unreadNotifCount</span>
+                    }
+                </a>
+                <a class="nav-link @(currentController == "Profile" && currentAction == "Index" ? "active" : "")" href="@Url.Action("Index", "Profile")">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
+                </a>
+                <a class="nav-link @(currentController == "Profile" && currentAction == "ChangePassword" ? "active" : "")" href="@Url.Action("ChangePassword", "Profile")">
+                    <i class="bi bi-key"></i>
+                    <span>Change Password</span>
+                </a>
+            </div>
+
+            <!-- Footer User Info inside Sidebar -->
+            <div class="p-3 border-top border-secondary border-opacity-25 mt-auto">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px; font-weight:700;">
+                            @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="text-white font-weight-bold text-truncate" style="font-size:0.85rem;">@User.Identity?.Name</div>
+                            <small class="text-white-50 d-block text-truncate" style="font-size:0.75rem;">@(isManager ? "Asset Manager" : "Inventory Executive")</small>
+                        </div>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-light border-0" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Top Header Navbar -->
+            <header class="top-navbar">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-light d-lg-none" type="button" id="sidebarToggle">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <h5 class="mb-0 font-weight-bold text-dark fs-6">@ViewData["Title"]</h5>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications Dropdown Button -->
+                    <a href="@Url.Action("Index", "Notifications")" class="btn btn-light position-relative btn-sm rounded-circle p-2" title="Notifications">
+                        <i class="bi bi-bell fs-6"></i>
+                        @if (unreadNotifCount > 0)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                <span class="visually-hidden">New notifications</span>
+                            </span>
+                        }
+                    </a>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" data-bs-toggle="dropdown">
+                            <span class="me-2 d-none d-md-inline font-weight-medium">@User.Identity?.Name</span>
+                            <span class="badge @(isManager ? "bg-primary" : "bg-info text-dark")">
+                                @(isManager ? "Asset Manager" : "Inventory Executive")
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-menu-item dropdown-item" href="@Url.Action("Index", "Profile")"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-menu-item dropdown-item" href="@Url.Action("ChangePassword", "Profile")"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Body Content -->
+            <main class="p-4 flex-grow-1">
+                <!-- Global TempData Alerts -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-white border-top py-3 px-4 text-center text-md-start d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <small class="text-muted">&copy; @DateTime.Now.Year - @org.OrganisationName Inventory Management System (IMS)</small>
+                <small class="text-muted">Version 1.0.0 (EF Core SQLite In-Memory)</small>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/dashboard-charts.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

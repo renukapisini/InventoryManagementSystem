@@ -1,0 +1,133 @@
+@model InventoryManagementSystem.Models.ViewModels.UserListViewModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">User Directory</h4>
+        <p class="text-muted small mb-0">Manage user accounts, system roles, and status activation.</p>
+    </div>
+    <a href="@Url.Action("Create", "Users")" class="btn btn-primary btn-sm shadow-sm">
+        <i class="bi bi-person-plus me-1"></i> Add New User
+    </a>
+</div>
+
+<!-- Filters Card -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Name, Email, Username, Emp ID..." />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="roleId" asp-items="Model.Roles" class="form-select">
+                    <option value="">-- All Roles --</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="department" class="form-select">
+                    <option value="">-- All Departments --</option>
+                    @foreach (var dept in Model.Departments)
+                    {
+                        <option value="@dept" selected="@(dept == Model.DepartmentFilter)">@dept</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i> Filter</button>
+                <a href="@Url.Action("Index", "Users")" class="btn btn-light text-muted"><i class="bi bi-x-circle"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table custom-table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>User Name</th>
+                        <th>Email & Contact</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Assigned Assets</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Users.Any())
+                    {
+                        foreach (var u in Model.Users)
+                        {
+                            <tr>
+                                <td class="font-monospace fw-bold text-dark">@u.EmployeeId</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Users", new { id = u.Id })" class="fw-bold text-primary text-decoration-none">
+                                        @u.FirstName @u.LastName
+                                    </a>
+                                    <small class="d-block text-muted">@@@u.Username</small>
+                                </td>
+                                <td>
+                                    <div class="small text-dark">@u.Email</div>
+                                    <small class="text-muted">@(u.MobileNumber ?? "No phone")</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(u.RoleName == "Asset Manager" ? "bg-primary" : "bg-info text-dark")">
+                                        @u.RoleName
+                                    </span>
+                                </td>
+                                <td class="text-muted small">@(u.Department ?? "N/A")</td>
+                                <td>
+                                    @if (u.IsActive)
+                                    {
+                                        <span class="badge bg-success-soft text-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-soft text-danger"><i class="bi bi-x-circle me-1"></i>Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@u.AssignedAssetsCount Assets</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="@Url.Action("Details", "Users", new { id = u.Id })" class="btn btn-light text-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Users", new { id = u.Id })" class="btn btn-light text-secondary" title="Edit User">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="ToggleActive" asp-route-id="@u.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-light @(u.IsActive ? "text-warning" : "text-success")" title="@(u.IsActive ? "Deactivate User" : "Activate User")">
+                                                <i class="bi @(u.IsActive ? "bi-person-x" : "bi-person-check")"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">No users found matching parameters.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
