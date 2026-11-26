@@ -46,6 +46,11 @@ namespace InventoryManagementSystem.Models.Entities
 
         public bool IsActive { get; set; } = true;
 
+        [StringLength(100)]
+        public string? GoogleSubjectId { get; set; }
+
+        public bool IsEmailVerified { get; set; } = true;
+
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedDate { get; set; }

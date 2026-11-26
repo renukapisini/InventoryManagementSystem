@@ -104,6 +104,7 @@ namespace InventoryManagementSystem.Services.Implementations
                     SerialNumber = a.SerialNumber,
                     PurchaseDate = a.PurchaseDate,
                     PurchaseCost = a.PurchaseCost,
+                    Quantity = a.Quantity,
                     Location = a.Location,
                     Department = a.Department,
                     AssignedToUserId = a.AssignedToUserId,
@@ -161,6 +162,7 @@ namespace InventoryManagementSystem.Services.Implementations
                 SerialNumber = a.SerialNumber,
                 PurchaseDate = a.PurchaseDate,
                 PurchaseCost = a.PurchaseCost,
+                Quantity = a.Quantity,
                 Location = a.Location,
                 Department = a.Department,
                 AssignedToUserId = a.AssignedToUserId,
@@ -257,6 +259,7 @@ namespace InventoryManagementSystem.Services.Implementations
                 SerialNumber = model.SerialNumber?.Trim(),
                 PurchaseDate = model.PurchaseDate,
                 PurchaseCost = model.PurchaseCost,
+                Quantity = model.Quantity > 0 ? model.Quantity : 1,
                 Location = model.Location?.Trim(),
                 Department = model.Department?.Trim(),
                 AssignedToUserId = model.AssignedToUserId,
@@ -270,10 +273,10 @@ namespace InventoryManagementSystem.Services.Implementations
 
             // Audit Trail
             await _auditService.LogActivityAsync("Create", "Asset", asset.Id, currentUsername,
-                $"Created asset '{asset.AssetName}' ({asset.AssetCode}) with purchase cost ${asset.PurchaseCost:N2}.");
+                $"Created asset '{asset.AssetName}' ({asset.AssetCode}) [Qty: {asset.Quantity}] with purchase cost ${asset.PurchaseCost:N2}.");
 
-            // In-app Notification
-            var notifMsg = $"New Inventory Added: {asset.AssetName} ({asset.AssetCode}) by {currentUsername}.";
+            // In-app Notification per Requirement 6 format
+            var notifMsg = $"New asset {asset.AssetName} ({asset.AssetCode}) has been added to inventory.";
             await _notificationService.NotifyAllManagersAsync(notifMsg, "AssetCreated", asset.Id);
 
             if (asset.AssignedToUserId.HasValue)
@@ -341,6 +344,7 @@ namespace InventoryManagementSystem.Services.Implementations
             asset.SerialNumber = model.SerialNumber?.Trim();
             asset.PurchaseDate = model.PurchaseDate;
             asset.PurchaseCost = model.PurchaseCost;
+            asset.Quantity = model.Quantity > 0 ? model.Quantity : 1;
             asset.Location = model.Location?.Trim();
             asset.Department = model.Department?.Trim();
             asset.AssignedToUserId = model.AssignedToUserId;

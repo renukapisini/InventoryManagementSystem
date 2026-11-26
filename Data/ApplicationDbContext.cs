@@ -9,7 +9,6 @@ namespace InventoryManagementSystem.Data
             : base(options)
         {
         }
-
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<Permission> Permissions { get; set; } = null!;
@@ -19,6 +18,7 @@ namespace InventoryManagementSystem.Data
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
         public DbSet<Organization> Organizations { get; set; } = null!;
+        public DbSet<OtpVerification> OtpVerifications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -75,7 +75,6 @@ namespace InventoryManagementSystem.Data
             {
                 entity.HasIndex(c => c.Name).IsUnique();
             });
-
             // Notification configuration
             modelBuilder.Entity<Notification>(entity =>
             {

@@ -179,16 +179,16 @@ namespace InventoryManagementSystem.Data
             // 6. Seed Organisation Profile
             var org = new Organization
             {
-                OrganisationName = "Apex Global Enterprise",
-                OrganisationCode = "ORG-APEX-01",
+                OrganisationName = "Enterprise Solutions Inc.",
+                OrganisationCode = "ORG-IMS-01",
                 Address = "500 Innovation Boulevard, Suite 800",
                 City = "San Francisco",
                 State = "CA",
                 Country = "USA",
                 PostalCode = "94107",
                 Phone = "+1 (800) 555-0199",
-                Email = "info@apexenterprise.com",
-                Website = "https://www.apexenterprise.com",
+                Email = "info@enterprise.com",
+                Website = "https://www.enterprise.com",
                 LogoPath = "/images/default-logo.svg",
                 UpdatedBy = adminUser.Username,
                 UpdatedDate = DateTime.UtcNow.AddDays(-5)

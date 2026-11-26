@@ -43,6 +43,11 @@ namespace InventoryManagementSystem.Models.ViewModels
         [Display(Name = "Purchase Cost ($)")]
         public decimal PurchaseCost { get; set; }
 
+        [Required(ErrorMessage = "Quantity is required.")]
+        [Range(1, 100000, ErrorMessage = "Quantity must be at least 1.")]
+        [Display(Name = "Quantity")]
+        public int Quantity { get; set; } = 1;
+
         [StringLength(100)]
         [Display(Name = "Location")]
         public string? Location { get; set; }

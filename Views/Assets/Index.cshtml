@@ -73,6 +73,7 @@
                         <th>Status</th>
                         <th>Location</th>
                         <th>Assigned To</th>
+                        <th>Qty</th>
                         <th>Cost</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -122,6 +123,9 @@
                                     {
                                         <span class="text-muted small">--</span>
                                     }
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-soft text-dark fw-bold">@item.Quantity</span>
                                 </td>
                                 <td class="fw-medium text-dark">
                                     $@item.PurchaseCost.ToString("N2")

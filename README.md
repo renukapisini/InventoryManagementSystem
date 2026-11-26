@@ -1,73 +1,39 @@
-<<<<<<< HEAD
-# Inventory Management System (IMS)
+# Inventory Management System (IMS) — Enterprise ASP.NET Core MVC Application
 
-An enterprise-grade, secure, full-stack web application built in **ASP.NET Core MVC** (.NET 9 / .NET 10), **Entity Framework Core (SQLite In-Memory)**, **Bootstrap 5**, and **Chart.js**.
+An enterprise-grade, secure, full-stack web application built in **ASP.NET Core MVC** (.NET 10), **Entity Framework Core (SQLite In-Memory)**, **Bootstrap 5**, and **Chart.js**.
 
 Designed following clean **Layered MVC + Service Layer Architecture**, SOLID principles, dependency injection, role-based authorization, real-time KPI dashboards, in-app notification center, SMTP email dispatch, audit logging, and reporting.
 
 ---
 
-## Key Features
+## Enhanced Features
 
-1. **Role-Based Access Control & Security**
-   - Cookie-based authentication (`CookieAuthenticationDefaults.AuthenticationScheme`).
+1. **User Registration & Validation**
+   - New registration module (`/Account/Register`) supporting Full Name, Email, Phone Number, Password, Confirm Password, optional Employee ID, and Role.
+   - Validation: Required fields, email format, password complexity (min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character), password confirmation, duplicate email, and duplicate employee ID checks.
    - Secure password hashing using ASP.NET Core `IPasswordHasher<User>`.
-   - Granular permission-based authorization policies (`[HasPermission(...)]`).
-   - Two distinct roles:
-     - **Asset Manager**: Full administrative access to assets, categories, users, roles, permissions, organisation profile, reports, and audit logs.
-     - **Inventory Executive**: Operational access to asset CRUD, reports, notifications, and profile management. (Restricted from User, Role, & Org Administration).
-   - Prevents users from modifying their own role or deactivating their own account.
-   - Deactivated users are blocked from logging in or having assets assigned.
 
-2. **Inventory Asset Management**
-   - Full CRUD operations with server & client validation.
-   - **Unique Asset Code** enforcement & duplicate code prevention.
-   - Search by asset code, name, serial number, category, location, or assigned custodian.
-   - Filter by category, status (Available, Assigned, Under Maintenance, Damaged, Retired, Lost), location, department, and assigned user.
-   - Asset assignment restricted to **Active users only**.
-   - Confirmation dialogs before deleting assets.
+2. **Email OTP Verification System**
+   - 6-digit numeric OTP generated via `IOtpService` upon user registration.
+   - Hashed OTP storage with 10-minute expiry time.
+   - Single-use policy and rate-limiting (60-second resend cooldown, max 5 attempts per OTP code).
+   - Email dispatch via `IEmailService` (SMTP with dev mode fallback logging).
 
-3. **Category Management**
-   - Asset Manager exclusive module.
-   - Create, edit, toggle active status, and view linked asset counts.
-   - **Delete Protection**: Prevents deleting categories that currently have linked assets.
+3. **Google OAuth 2.0 / Google Login**
+   - "Continue with Google" integration using `Microsoft.AspNetCore.Authentication.Google`.
+   - Flow: Login/Register page $\rightarrow$ Google Authorization $\rightarrow$ Backend validates identity $\rightarrow$ Find or create user account in DB $\rightarrow$ Establish authenticated Cookie session $\rightarrow$ Redirect to Dashboard.
+   - Stores Google Subject ID (`GoogleSubjectId`), Email, First Name, Last Name.
+   - **Mock Google Login** endpoint included for local dev testing without active live secrets.
 
-4. **User Management**
-   - Asset Manager exclusive module.
-   - Create, edit, search, filter, and activate/deactivate users.
-   - Unique Username and Email validation.
+4. **Asset Creation Notifications & Quantity**
+   - Asset model updated with `Quantity` (default: `1`, range: `1..100000`).
+   - Creation of an asset automatically triggers in-app notification formatted as:
+     `"New asset Dell Laptop (AST-1001) has been added to inventory."`
+   - Connected directly to the asset creation database transaction.
 
-5. **Organisation Profile & Branding**
-   - Customise company name, code, contact details, and website.
-   - **Logo Image Upload** supporting PNG, JPG, JPEG, SVG, WebP formats (max 2MB).
-   - Organisation logo & name rendered dynamically across top header navbar and generated report titles.
-
-6. **Interactive Dashboard & Chart.js**
-   - Live KPI cards (Total Assets, Active Assets, Available Assets, Assigned Assets, Under Maintenance, Damaged/Lost, Retired, Total Categories, Unread Notifications, Total Inventory Value).
-   - Real-time Chart.js visualisations:
-     - Assets by Category (Doughnut Chart)
-     - Assets by Status (Bar Chart)
-     - Assets by Location (Pie Chart)
-     - Assets by Department (Horizontal Bar Chart)
-   - Recent asset updates list, activity feeds, and notification badges.
-
-7. **Notification Center & SMTP Email Service**
-   - In-app notification center with read/unread indicators, badge counts, and user isolation.
-   - Automatic notification dispatch on Asset Created, Updated, and Deleted events.
-   - SMTP Email Service configured via `appsettings.json` with fallback logging in dev mode.
-
-8. **Audit Trail**
-   - `AuditLogs` table tracking Action (Create, Update, Delete, Login, PasswordChange), Entity, Entity ID, PerformedBy, Description, and Server Timestamps.
-
-9. **Comprehensive Reporting Module**
-   - 6 Filtered Reports:
-     1. Inventory Register Report
-     2. Asset Status Report
-     3. Category Report
-     4. Location Report
-     5. Department Report
-     6. Inventory Activity Log Report
-   - Filters by date range, category, status, location, department, and user. Print support integrated.
+5. **Notification UI & Header Bell**
+   - Header notification bell with live unread badge count and interactive dropdown preview.
+   - Mark individual notification as read & mark all as read.
 
 ---
 
@@ -80,60 +46,58 @@ The application automatically seeds deterministic sample data on startup.
 | **Asset Manager** | `manager@ims.com` or `manager` | `Password123!` | Full Admin (Assets, Users, Roles, Org, Reports, Notifications) |
 | **Inventory Executive** | `executive@ims.com` or `executive` | `Password123!` | Operational (Assets CRUD, Reports, Notifications, Profile) |
 
-*Note: 1-click quick login buttons are provided on the Login page for convenience.*
+*Note: Quick demo login buttons are provided on the Login page.*
 
 ---
 
-## Technology Stack
+## Google Cloud & OAuth Setup Instructions
 
-- **Backend**: C#, ASP.NET Core 9/10 MVC, Entity Framework Core 10, Dependency Injection.
-- **Frontend**: Razor Views (.cshtml), Bootstrap 5, Bootstrap Icons, Chart.js, jQuery Validation.
-- **Database**: SQLite In-Memory using a singleton persistent `SqliteConnection`.
-- **Testing**: xUnit, Moq, EF Core InMemory.
+To configure live Google OAuth 2.0 login in Google Cloud Console:
 
----
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project (e.g. `IMS-Inventory-System`).
+3. Navigate to **APIs & Services** $\rightarrow$ **OAuth consent screen**:
+   - Select **User Type**: External.
+   - Fill in App Information (App Name: `Inventory Management System`, User support email, Developer contact).
+   - Save and continue.
+4. Navigate to **APIs & Services** $\rightarrow$ **Credentials**:
+   - Click **Create Credentials** $\rightarrow$ Select **OAuth client ID**.
+   - Application type: **Web application**.
+   - Name: `IMS Web Client`.
+   - **Authorized JavaScript origins**:
+     `https://localhost:5001`, `http://localhost:5000`
+   - **Authorized redirect URIs**:
+     `https://localhost:5001/signin-google`, `http://localhost:5000/signin-google`
+5. Click **Create**. Copy the **Client ID** and **Client Secret**.
 
-## Project Structure
+### Setting Environment Variables:
+Add the credentials to `appsettings.json` or system environment variables:
 
+```json
+"Google": {
+  "ClientId": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+  "ClientSecret": "YOUR_GOOGLE_CLIENT_SECRET"
+}
 ```
-InventoryManagementSystem/
-├── Controllers/              # MVC Controllers (Account, Dashboard, Assets, Categories, Users, Roles, Organization, Notifications, Reports, Profile)
-├── Models/
-│   ├── Entities/             # Domain Entities (User, Role, Permission, RolePermission, Asset, Category, Notification, AuditLog, Organization)
-│   └── ViewModels/           # Form & List ViewModels
-├── Data/
-│   ├── ApplicationDbContext.cs # EF Core DbContext
-│   └── DbInitializer.cs       # Seed Data Service (~25 Assets, Users, Roles, Org Profile)
-├── Services/
-│   ├── Interfaces/           # Service Interfaces (IAssetService, IUserService, ICategoryService, etc.)
-│   └── Implementations/      # Business Logic Services
-├── Authorization/            # Permission Handler & Attributes ([HasPermission])
-├── Views/                    # Razor Views (Shared _Layout, Account, Dashboard, Assets, Categories, Users, Roles, Organization, Notifications, Reports, Profile)
-├── wwwroot/
-│   ├── css/site.css          # Custom Responsive Design System
-│   └── js/dashboard-charts.js # Chart.js Visualization Logic
-├── Program.cs                # Startup, DI & Middleware Setup
-├── appsettings.json          # Configuration Settings
-└── README.md                 # Project Documentation
 
-InventoryManagementSystem.Tests/
-├── UnitTest1.cs              # Automated xUnit Business Logic Tests
-└── InventoryManagementSystem.Tests.csproj
+Or set in PowerShell:
+```powershell
+$env:Google__ClientId="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+$env:Google__ClientSecret="YOUR_GOOGLE_CLIENT_SECRET"
 ```
 
 ---
 
 ## Build & Execution Instructions
 
-### 1. Run the Web Application
-Open PowerShell / Terminal in the project directory:
+### 1. Run Web Application:
 ```powershell
 cd C:\Users\sridivya\.gemini\antigravity\scratch\InventoryManagementSystem
 dotnet run
 ```
-Open your browser at `https://localhost:5001` or `http://localhost:5000`.
+Access at `https://localhost:5001` or `http://localhost:5000`.
 
-### 2. Execute Automated Unit Tests
+### 2. Run Automated Tests:
 ```powershell
 cd C:\Users\sridivya\.gemini\antigravity\scratch\InventoryManagementSystem.Tests
 dotnet test
@@ -141,58 +105,15 @@ dotnet test
 
 ---
 
-## Database Behavior & Persistence
-
-The application uses **EF Core SQLite In-Memory** configured with a persistent `SqliteConnection` kept open for the lifetime of the process in `Program.cs`:
-```csharp
-var sqliteConnection = new SqliteConnection("Data Source=InMemoryImsDb;Mode=Memory;Cache=Shared");
-sqliteConnection.Open();
-```
-- **In-Memory Data Retention**: All created, updated, or deleted assets, users, and audit logs persist in memory throughout the running application session.
-- **Reset Behavior**: Stopping or restarting the application process clears the in-memory database, which is then cleanly re-seeded by `DbInitializer.cs`.
-
----
-
-## SMTP Email Configuration
-
-To configure real SMTP email delivery, update `appsettings.json`:
-```json
-"SmtpSettings": {
-  "Host": "smtp.yourprovider.com",
-  "Port": 587,
-  "EnableSsl": true,
-  "SenderEmail": "notifications@yourcompany.com",
-  "SenderName": "IMS Notifications",
-  "Username": "your_smtp_username",
-  "Password": "your_smtp_password",
-  "IsEnabled": true
-}
-```
-If `IsEnabled` is `false`, the email service operates in **Development Mode**, logging dispatched email contents safely to the console without interrupting workflow execution.
-
----
-
 ## Final SRS Requirements-to-Implementation Checklist
 
 | Requirement | Implementation Status | Notes |
 | :--- | :---: | :--- |
-| **ASP.NET Core MVC Layered Architecture** | Completed | Controllers, Service Layer, EF Core Data Layer, ViewModels, Razor Views |
-| **SQLite In-Memory Connection** | Completed | Persistent singleton SqliteConnection setup in `Program.cs` |
-| **Authentication & Password Hashing** | Completed | Cookie Auth, `IPasswordHasher<User>` password hashing |
-| **Role-Based & Permission Authorization** | Completed | `[Authorize]`, `[HasPermission]`, Asset Manager & Executive roles |
-| **Asset Management CRUD** | Completed | Unique code, search, filter, pagination, active user check |
-| **Category Management** | Completed | CRUD, active toggle, delete protection if assets linked |
-| **User Management** | Completed | Asset Manager only, unique username/email, activate/deactivate |
-| **Role & Permission Matrix** | Completed | Manage permissions assigned to roles |
-| **Organisation Profile & Logo Upload** | Completed | Edit profile, logo file upload (PNG/JPG/SVG/WebP, max 2MB) |
-| **Dashboard KPIs & Charts** | Completed | 8 KPI cards, 4 Chart.js charts (Category, Status, Location, Dept) |
-| **In-App Notification Center** | Completed | Mark read, unread count badge, user notification isolation |
-| **SMTP Email Service** | Completed | Email dispatch on Asset Create/Update/Delete with dev fallback |
-| **Audit Trail** | Completed | `AuditLogs` table recording user actions and server timestamps |
-| **6 Filtered Reports** | Completed | Register, Status, Category, Location, Department, Activity reports |
-| **My Profile & Change Password** | Completed | View profile, change password with complexity validation |
-| **Automated Testing** | Completed | xUnit test suite passing 100% (5/5 tests passed) |
-=======
-# IMS
- - .NET Framework + MySQL
->>>>>>> 4ce237c9116b11e8ce1086bf6e486a463b1a88bc
+| **User Registration** | Completed | Full Name, Email, Phone, Password, Employee ID, Role selection |
+| **Google Login** | Completed | Google OAuth 2.0 + Mock Google Login option for dev testing |
+| **Email OTP System** | Completed | 6-digit numeric OTP, 10-min expiry, rate-limiting, single-use |
+| **Google Cloud Readiness** | Completed | Configured via environment variables / appsettings with docs |
+| **Asset Creation Notification** | Completed | `"New asset {AssetName} ({AssetCode}) has been added to inventory."` |
+| **Notification Header UI** | Completed | Bell icon with unread count badge & interactive dropdown preview |
+| **Asset Quantity** | Completed | Quantity field integrated across entities, ViewModels, and Razor views |
+| **Automated Unit Tests** | Completed | 6/6 xUnit test cases passed cleanly |

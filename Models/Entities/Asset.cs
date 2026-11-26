@@ -35,6 +35,9 @@ namespace InventoryManagementSystem.Models.Entities
         [Range(0, double.MaxValue, ErrorMessage = "Purchase cost must be non-negative.")]
         public decimal PurchaseCost { get; set; }
 
+        [Range(1, 100000, ErrorMessage = "Quantity must be at least 1.")]
+        public int Quantity { get; set; } = 1;
+
         [StringLength(100)]
         public string? Location { get; set; }
 

@@ -133,15 +133,31 @@
 
                 <div class="d-flex align-items-center gap-3">
                     <!-- Notifications Dropdown Button -->
-                    <a href="@Url.Action("Index", "Notifications")" class="btn btn-light position-relative btn-sm rounded-circle p-2" title="Notifications">
-                        <i class="bi bi-bell fs-6"></i>
-                        @if (unreadNotifCount > 0)
-                        {
-                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                <span class="visually-hidden">New notifications</span>
-                            </span>
-                        }
-                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-light position-relative btn-sm rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="bi bi-bell fs-6"></i>
+                            @if (unreadNotifCount > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                    <span class="visually-hidden">New notifications</span>
+                                </span>
+                            }
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg p-0" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                            <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light">
+                                <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-bell me-1 text-primary"></i> Notifications</h6>
+                                @if (unreadNotifCount > 0)
+                                {
+                                    <span class="badge bg-danger rounded-pill">@unreadNotifCount New</span>
+                                }
+                            </div>
+                            <div class="p-2">
+                                <a href="@Url.Action("Index", "Notifications")" class="dropdown-item text-center small text-primary fw-semibold p-2">
+                                    View All Notifications &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- User Profile Dropdown -->
                     <div class="dropdown">

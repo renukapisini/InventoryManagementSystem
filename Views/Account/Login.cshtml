@@ -19,6 +19,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1.5rem;
         }
         .login-card {
             width: 100%;
@@ -31,76 +32,100 @@
     </style>
 </head>
 <body>
-    <div class="p-3">
-        <div class="login-card p-4 p-md-5">
-            <div class="text-center mb-4">
-                <div class="bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 56px; height: 56px;">
-                    <i class="bi bi-box-seam fs-2"></i>
+    <div class="login-card p-4 p-md-5">
+        <div class="text-center mb-4">
+            <div class="bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 56px; height: 56px;">
+                <i class="bi bi-box-seam fs-2"></i>
+            </div>
+            <h4 class="font-weight-bold mb-1 text-dark">IMS Portal</h4>
+            <p class="text-muted small">Inventory Management System</p>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success small p-2 mb-3" role="alert">
+                <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger small p-2 mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small p-2 mb-3" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="UsernameOrEmail" class="form-label font-weight-medium small text-dark"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                    <input asp-for="UsernameOrEmail" id="usernameInput" class="form-control" placeholder="e.g. manager@ims.com or manager" required />
                 </div>
-                <h4 class="font-weight-bold mb-1 text-dark">IMS Portal</h4>
-                <p class="text-muted small">Inventory Management System</p>
+                <span asp-validation-for="UsernameOrEmail" class="text-danger small"></span>
             </div>
 
-            <form asp-action="Login" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
-
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger small p-2 mb-3" role="alert"></div>
-
-                <div class="mb-3">
-                    <label asp-for="UsernameOrEmail" class="form-label font-weight-medium small text-dark"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
-                        <input asp-for="UsernameOrEmail" id="usernameInput" class="form-control" placeholder="e.g. manager@ims.com or manager" required />
-                    </div>
-                    <span asp-validation-for="UsernameOrEmail" class="text-danger small"></span>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label font-weight-medium small text-dark"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+                    <input asp-for="Password" id="passwordInput" class="form-control" placeholder="••••••••" required />
                 </div>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
 
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label font-weight-medium small text-dark"></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
-                        <input asp-for="Password" id="passwordInput" class="form-control" placeholder="••••••••" required />
-                    </div>
-                    <span asp-validation-for="Password" class="text-danger small"></span>
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label small text-muted"></label>
                 </div>
+                <a href="@Url.Action("Register", "Account")" class="small fw-semibold text-primary text-decoration-none">Register New Account</a>
+            </div>
 
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <div class="form-check">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label small text-muted"></label>
+            <button type="submit" class="btn btn-primary w-100 py-2 mb-3 shadow-sm font-weight-semibold">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+            </button>
+        </form>
+
+        <div class="position-relative my-3 text-center">
+            <hr class="text-muted">
+            <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted small fw-semibold">OR</span>
+        </div>
+
+        <!-- Google OAuth Login -->
+        <form asp-action="MockGoogleLogin" method="post" class="mb-3">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-danger w-100 py-2 font-weight-medium d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-google"></i> Continue with Google
+            </button>
+        </form>
+
+        <!-- Quick Demo Login Helpers -->
+        <div class="bg-light p-3 rounded-3 border">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold text-uppercase text-secondary" style="font-size:0.7rem; letter-spacing:0.05em;">Quick Demo Credentials</span>
+                <span class="badge bg-success-soft" style="font-size:0.65rem;">Auto-Seeded</span>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary text-start d-flex align-items-center justify-content-between" onclick="fillDemo('manager@ims.com', 'Password123!')">
+                    <div>
+                        <strong class="d-block text-dark">Asset Manager</strong>
+                        <small class="text-muted">manager@ims.com</small>
                     </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100 py-2 mb-3 shadow-sm font-weight-semibold">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                    <i class="bi bi-arrow-right-short fs-4"></i>
                 </button>
-            </form>
-
-            <hr class="my-4 text-muted">
-
-            <!-- Quick Demo Login Helpers -->
-            <div class="bg-light p-3 rounded-3 border">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="fw-bold text-uppercase text-secondary" style="font-size:0.7rem; letter-spacing:0.05em;">Quick Demo Credentials</span>
-                    <span class="badge bg-success-soft" style="font-size:0.65rem;">Auto-Seeded</span>
-                </div>
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary text-start d-flex align-items-center justify-content-between" onclick="fillDemo('manager@ims.com', 'Password123!')">
-                        <div>
-                            <strong class="d-block text-dark">Asset Manager</strong>
-                            <small class="text-muted">manager@ims.com</small>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-4"></i>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary text-start d-flex align-items-center justify-content-between" onclick="fillDemo('executive@ims.com', 'Password123!')">
-                        <div>
-                            <strong class="d-block text-dark">Inventory Executive</strong>
-                            <small class="text-muted">executive@ims.com</small>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-4"></i>
-                    </button>
-                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary text-start d-flex align-items-center justify-content-between" onclick="fillDemo('executive@ims.com', 'Password123!')">
+                    <div>
+                        <strong class="d-block text-dark">Inventory Executive</strong>
+                        <small class="text-muted">executive@ims.com</small>
+                    </div>
+                    <i class="bi bi-arrow-right-short fs-4"></i>
+                </button>
             </div>
         </div>
     </div>
