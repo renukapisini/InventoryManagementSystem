@@ -92,14 +92,14 @@ $env:Google__ClientSecret="YOUR_GOOGLE_CLIENT_SECRET"
 
 ### 1. Run Web Application:
 ```powershell
-cd C:\Users\sridivya\.gemini\antigravity\scratch\InventoryManagementSystem
+cd C:\Users\xxx\.gemini\antigravity\scratch\InventoryManagementSystem
 dotnet run
 ```
 Access at `https://localhost:5001` or `http://localhost:5000`.
 
 ### 2. Run Automated Tests:
 ```powershell
-cd C:\Users\sridivya\.gemini\antigravity\scratch\InventoryManagementSystem.Tests
+cd C:\Users\xxx\.gemini\antigravity\scratch\InventoryManagementSystem.Tests
 dotnet test
 ```
 
